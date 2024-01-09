@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .pice {
+            border: solid 1px;
+            width: 50px;
+            height: 50px;
+            float: left;
+        }
+
+        #c {
+            background-color: red;
+            height: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="c">
+        <div class="pice" onmouseover="show(this)"></div>
+        <div class="pice" onmouseover="show(this)"></div>
+        <div class="pice" onmouseover="show(this)"></div>
+    </div>
+    <script>
+        // Traversing
+        function show(d) {
+            console.log(d);
+            const els = d.parentElement.children;
+            for (let i = 0; i < els.length; i++)
+                els[i].style.backgroundColor = "yellow"
+        }
+        // Closures
+        let clo = function (i) {
+            return function () {
+                console.log("f", i);
+            }
+        }
+
+        for (var i = 0; i < 5; i++) {  // let / var !!!
+            const el = document.createElement("button");
+            el.innerText = "Kliknij mnie";
+            el.onclick = clo(i)
+            document.body.appendChild(el);
+        }
+    </script>
+</body>
+
+</html>

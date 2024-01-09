@@ -15,10 +15,6 @@ let firstShip = 0
 let playerBoard = []
 let botBoard = []
 
-function drawPlayereShips() {
-    const allShips = document.getElementById("allShips")
-}
-
 let boardProperties = {
     width: 12,
     height: 12,
@@ -43,36 +39,67 @@ let boardProperties = {
         return boardArray
     },
     createBattleField(boardOut, es) {
-        // let boardOut = this.createBoard()
-        const board = document.getElementById("board")
-        const mainDiv = document.createElement("div")
-        mainDiv.classList.add("mainBoard")
+        const board = document.getElementById("board");
+        board.addEventListener("contextmenu", (e) => { e.preventDefault() });
+        board.onmouseleave = drawingPlayerShips.goingOutOfBoard.bind(this);
+
+        const mainDiv = document.createElement("div");
+        board.innerHTML = "";
+        mainDiv.classList.add("mainBoard");
+
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
-                if (boardOut[i][j] != -1) {
-                    const div = document.createElement("div")
-                    div.classList.add("pieceOfShip")
-                    if (es) {
-                        div.onmouseover = drawingPlayerShips.drawingSelectedShip
-                    }
-                    div.setAttribute(`data-x`, j)
-                    div.setAttribute(`data-y`, i)
-                    mainDiv.append(div)
-                    board.append(mainDiv)
-                    if (boardOut[i][j] == 1) {
-                        div.classList.add("pieceOfShipBlack")
-                        mainDiv.append(div)
-                        board.append(mainDiv)
-                    }
+                let div = document.createElement("div");
+                // div.addEventListener("click", drawingPlayerShips.putShipsOnBoard);
+                // div.addEventListener("click", () => {
+                //     console.log("KUTAS");
+                // });
+
+                switch (boardOut[i][j]) {
+                    case 0:
+                        div.classList.add("pieceOfShip");
+                        if (es) {
+                            div.addEventListener("contextmenu", drawingPlayerShips.changeDirection.bind(this));
+                            div.addEventListener("mouseenter", drawingPlayerShips.drawingSelectedShip);
+                            div.addEventListener("click", drawingPlayerShips.putShipsOnBoard);
+                            div.addEventListener("click", () => {
+                                console.log("siema");
+                            });
+                            console.log(div.addEventListener("click", () => {
+                                console.log("siema");
+                            }))
+                        }
+
+                        div.setAttribute("data-x", j);
+                        div.setAttribute("data-y", i);
+                        break;
+                    case 1:
+                        div.classList.add("pieceOfShipBlack");
+                        break;
+                    case 2:
+                        div.classList.add("potencialShip");
+                        if (es) {
+                            div.addEventListener("contextmenu", drawingPlayerShips.changeDirection);
+                            div.addEventListener("mouseenter", drawingPlayerShips.drawingSelectedShip);
+                            // div.addEventListener("click", drawingPlayerShips.putShipsOnBoard);
+                        }
+                        div.setAttribute("data-x", j);
+                        div.setAttribute("data-y", i);
+                        break;
                 }
+                mainDiv.append(div);
             }
         }
+        board.append(mainDiv);
     }
 }
 
 let drawShips = {
     xyArray: [-1, 1],
     direction: null,
+    // funitoi: () =>{
+
+    // },
     drawDirection() {
         this.direction = this.xyArray[Math.floor(Math.random() * this.xyArray.length)]
     },
@@ -156,24 +183,22 @@ let drawShips = {
     }
 }
 
+let directionShip = true
 let drawingPlayerShips = {
     selectedShipLenght: 4,
-    light(d) {
-        d = this
-        const els = d.parentElement.children;
+    light() {
+        const els = this.parentElement.children;
         for (let i = 0; i < els.length; i++)
             els[i].style.backgroundColor = "purple"
     },
-    lightoff(d) {
-        d = this
-        const els = d.parentElement.children;
+    lightoff() {
+        const els = this.parentElement.children;
         for (let i = 0; i < els.length; i++) {
             els[i].style.backgroundColor = "white";
         }
     },
-    selectedShip(d) {
-        d = this
-        const els = d.parentElement.children;
+    selectedShip() {
+        const els = this.parentElement.children;
         drawingPlayerShips.selectedShipLenght = els.length
         if (selectedI == 0) {
             addFunctions()
@@ -194,7 +219,15 @@ let drawingPlayerShips = {
             selectedI = 0
         }
     },
-    drawingSelectedShip(d) {
+    goingOutOfBoard() {
+        boardProperties.createBattleField(playerBoard, true)
+        // paintAllBoard()
+        console.log("WYJEACH:ES");
+    },
+    changeDirection() {
+        directionShip = !directionShip
+    },
+    drawingSelectedShip() {
         for (let i = 0; i < 12; i++) {
             playerBoard[i] = []
             for (let j = 0; j < 12; j++) {
@@ -211,30 +244,53 @@ let drawingPlayerShips = {
                 }
             }
         }
-        paintAllBoard()
-        d = this
-        // console.log(d.parentElement.children);
-        let allPiecesOfShips = d.parentElement.children
-
-        const x = parseInt(d.getAttribute("data-x"))
-        const y = parseInt(d.getAttribute("data-y"))
-
+        // console.log(e.k);
+        const x = parseInt(this.getAttribute("data-x"))
+        const y = parseInt(this.getAttribute("data-y"))
         console.log(x, y);
-        //dodac pion i poziom
-        const shipLength = drawingPlayerShips.selectedShipLenght
-        console.log(shipLength);
 
-        console.log(playerBoard);
-        for (let i = 0; i < shipLength; i++) {
+        const shipLength = drawingPlayerShips.selectedShipLenght
+        if (directionShip) { //poziom
             if (x + shipLength < 12) {
-                playerBoard[y][x + i] = 1
-            } else {
-                playerBoard[y][x] = 1
+                for (let i = 0; i < shipLength; i++) {
+                    playerBoard[y][x + i] = 2
+                }
+            } else { //wyjezdza poza plansze
+                let diff = 11 - x
+                for (let i = 1; i <= shipLength - diff; i++) {
+                    playerBoard[y][x - i] = 2
+                }
+                for (let i = 0; i < diff; i++) {
+                    playerBoard[y][x + i] = 2
+                }
+            }
+        } else { //pion
+            if (y + shipLength < 12) {
+                for (let i = 0; i < shipLength; i++) {
+                    playerBoard[y + i][x] = 2
+                }
+            } else { //wyjezdza poza plansze
+                let diff = 11 - y
+                for (let i = 1; i <= shipLength - diff; i++) {
+                    playerBoard[y - i][x] = 2
+                }
+                for (let i = 0; i < diff; i++) {
+                    playerBoard[y + i][x] = 2
+                }
             }
         }
-        console.log(playerBoard); //nie wiem co sie dzieje
-
+        boardProperties.createBattleField(playerBoard, true)
+    },
+    putShipsOnBoard() {
+        console.log("KLIKNIETYT COKOLWIEK SIE DZIEJE?!?!??!?");
+        // d = this
+        // const x = parseInt(d.getAttribute("data-x"))
+        // const y = parseInt(d.getAttribute("data-y"))
+        // const shipLength = drawingPlayerShips.selectedShipLenght
+        // console.log(shipLength);
+        // console.log(x, y);
     }
+
 }
 
 function paintAll() {
@@ -274,8 +330,6 @@ function paintAllBoard() {
 function addFunctions() {
     const shipsHTML = document.getElementById("allShips")
     const shipsHTMLArray = shipsHTML.children;
-    // var selectedShipLenght = 4
-
     for (let i = 0; i < shipsHTMLArray.length; i++) {
         let ship = shipsHTMLArray[i].children
         for (let j = 0; j < ship.length; j++) {
@@ -306,4 +360,3 @@ function init() {
     addFunctions()
     paintAll()
 }
-

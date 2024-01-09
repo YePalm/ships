@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .pice {
+            border: solid 1px;
+            width: 64px;
+            height: 64px;
+            float: left;
+        }
+
+        .border {
+            background-color: pink;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="playField"></div>
+    <script>
+        const game = {
+            width: 12,
+            height: 12,
+            arr: [],
+            init() {
+                this.generatePlayfild();
+                console.table(this.arr);
+                this.render();
+            },
+            generatePlayfild() {
+                for (let i = 0; i < this.height; i++) {
+                    this.arr[i] = [];
+                    for (let j = 0; j < this.width; j++) {
+                        if (i == 0 || j == 0 || i == this.height - 1 || j == this.width - 1)
+                            this.arr[i][j] = { type: -1 };
+                        else
+                            this.arr[i][j] = { type: 0 };
+                    }
+                }
+            },
+            render() {
+                const pf = document.getElementById("playField");
+                pf.style.width = (this.width * 64) + "px";
+                for (let i = 0; i < this.height; i++) {
+                    for (let j = 0; j < this.width; j++) {
+                        const p = document.createElement("div");
+                        p.classList.add("pice");
+                        if (this.arr[i][j].type == -1)
+                            p.classList.add("border");
+                        p.innerText = this.arr[i][j].type
+                        this.arr[i][j].element = p
+                        pf.append(p);
+                    }
+                }
+            }
+        }
+
+        game.init();
+
+    </script>
+
+</body>
+
+</html>

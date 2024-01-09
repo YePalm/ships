@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let plansza = {
+            pole: [],
+            nazwa: "Nazwa",
+            text: undefined,
+            init(txt) {
+                console.log(this);
+                console.log("ok", txt);
+                // plansza.text = txt;
+                this.text = txt;
+                this.addButton();
+            },
+            addButton() {
+                console.log("b:", this);
+                const b = document.createElement("button");
+                b.innerText = this.text;
+
+                /*
+                let dys = this;
+                b.onclick = function () {
+                    console.log(dys, this)
+                    this.innerText = dys.nazwa
+                }*/
+
+
+                b.onclick = function (e) {
+                    console.log(this, e.target)
+                    e.target.innerText = this.nazwa
+                }.bind(this);
+
+                // b.onclick = (e) => {
+                //     console.log(this);
+                //     e.target.innerText = this.nazwa
+                // }
+
+                document.body.append(b);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            plansza.init("Test");
+
+            console.log("ASD", plansza, plansza.nazwa, plansza.text)
+        });
+
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
