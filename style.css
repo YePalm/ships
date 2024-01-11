@@ -56,3 +56,11 @@
     background-color: purple;
     border: 1px solid black;
 }
+
+.erroredShip {
+    float: left;
+    width: 25px;
+    height: 25px;
+    background-color: red;
+    border: 1px solid black;
+}

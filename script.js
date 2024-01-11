@@ -64,12 +64,8 @@ let boardProperties = {
                                 dis = this
                                 putShipsOnBoard(e, dis)
                             });
-                            // div.addEventListener("mouseout", function () {
-                            //     console.log("ASDASD");
-                            // })
                             div.setAttribute("data-x", j)
                             div.setAttribute("data-y", i)
-
                         }
                         break;
                     case 1:
@@ -83,7 +79,6 @@ let boardProperties = {
                             div.addEventListener("mousedown", function (e) {
                                 dis = this
                                 putShipsOnBoard(e, dis)
-
                             });
                         }
                         div.setAttribute("data-x", j)
@@ -91,6 +86,15 @@ let boardProperties = {
                         break;
                     case 3:
                         div.classList.add("puttedShip")
+                        break;
+                    case 4:
+                        div.classList.add("erroredShip")
+                        div.addEventListener("contextmenu", drawingPlayerShips.changeDirection)
+                        div.addEventListener("mouseover", drawingPlayerShips.drawingSelectedShip)
+                        div.addEventListener("mousedown", function (e) {
+                            dis = this
+                            putShipsOnBoard(e, dis)
+                        });
                         break;
                 }
                 if (es) {
@@ -323,7 +327,9 @@ let drawingPlayerShips = {
                         playerBoard[y][x + i] = 2
                     }
                 } else {
-                    // playerBoard[y][x + i] = 4
+                    for (let i = 0; i < shipLength; i++) {
+                        playerBoard[y][x + i] = 4
+                    }
                 }
             } else { //wyjezdza poza plansze
                 let diff = 11 - x
@@ -414,10 +420,10 @@ function init() {
     console.log(playerBoard);
     boardProperties.createBattleField(playerBoard, true)
 
-    // botBoard = boardProperties.createBoard()
-    // drawShips.drawShips(botBoard)
-    // console.log(botBoard);
-    // boardProperties.createBattleField(botBoard, false)
+    botBoard = boardProperties.createBoard()
+    drawShips.drawShips(botBoard)
+    console.log(botBoard);
+    boardProperties.createBattleField(botBoard, false)
 
     addFunctions()
     paintAll()
