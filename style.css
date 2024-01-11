@@ -10,6 +10,9 @@
 }
 
 .pieceOfShipBlack {
+    float: left;
+    width: 25px;
+    height: 25px;
     background-color: black;
 }
 
@@ -37,4 +40,19 @@
     border: 1px solid black;
     background-color: rgb(191, 191, 145);
     float: left;
+}
+
+#playerBoardHTML {
+    width: 250px;
+    height: 250px;
+    float: left;
+    margin-right: 25px;
+}
+
+.puttedShip {
+    float: left;
+    width: 25px;
+    height: 25px;
+    background-color: purple;
+    border: 1px solid black;
 }

@@ -39,58 +39,117 @@ let boardProperties = {
         return boardArray
     },
     createBattleField(boardOut, es) {
-        const board = document.getElementById("board");
-        board.addEventListener("contextmenu", (e) => { e.preventDefault() });
-        board.onmouseleave = drawingPlayerShips.goingOutOfBoard.bind(this);
+        const board = document.getElementById("board")
+        const playerBoardHTML = document.getElementById("playerBoardHTML")
 
-        const mainDiv = document.createElement("div");
-        board.innerHTML = "";
-        mainDiv.classList.add("mainBoard");
+        board.addEventListener("contextmenu", (e) => { e.preventDefault() })
+        playerBoardHTML.addEventListener("contextmenu", (e) => { e.preventDefault() })
+        if (es) {
+            playerBoardHTML.innerHTML = ""
+        }
+
+        const mainDiv = document.createElement("div")
+        mainDiv.classList.add("mainBoard")
 
         for (let i = 0; i < this.height; i++) {
             for (let j = 0; j < this.width; j++) {
-                let div = document.createElement("div");
-                // div.addEventListener("click", drawingPlayerShips.putShipsOnBoard);
-                // div.addEventListener("click", () => {
-                //     console.log("KUTAS");
-                // });
-
+                let div = document.createElement("div")
                 switch (boardOut[i][j]) {
                     case 0:
-                        div.classList.add("pieceOfShip");
+                        div.classList.add("pieceOfShip")
                         if (es) {
-                            div.addEventListener("contextmenu", drawingPlayerShips.changeDirection.bind(this));
-                            div.addEventListener("mouseenter", drawingPlayerShips.drawingSelectedShip);
-                            div.addEventListener("click", drawingPlayerShips.putShipsOnBoard);
-                            div.addEventListener("click", () => {
-                                console.log("siema");
+                            div.addEventListener("contextmenu", drawingPlayerShips.changeDirection.bind(this))
+                            div.addEventListener("mouseover", drawingPlayerShips.drawingSelectedShip)
+                            div.addEventListener("mousedown", function (e) {
+                                dis = this
+                                putShipsOnBoard(e, dis)
                             });
-                            console.log(div.addEventListener("click", () => {
-                                console.log("siema");
-                            }))
-                        }
+                            // div.addEventListener("mouseout", function () {
+                            //     console.log("ASDASD");
+                            // })
+                            div.setAttribute("data-x", j)
+                            div.setAttribute("data-y", i)
 
-                        div.setAttribute("data-x", j);
-                        div.setAttribute("data-y", i);
+                        }
                         break;
                     case 1:
-                        div.classList.add("pieceOfShipBlack");
+                        div.classList.add("pieceOfShipBlack")
                         break;
                     case 2:
-                        div.classList.add("potencialShip");
+                        div.classList.add("potencialShip")
                         if (es) {
-                            div.addEventListener("contextmenu", drawingPlayerShips.changeDirection);
-                            div.addEventListener("mouseenter", drawingPlayerShips.drawingSelectedShip);
-                            // div.addEventListener("click", drawingPlayerShips.putShipsOnBoard);
+                            div.addEventListener("contextmenu", drawingPlayerShips.changeDirection)
+                            div.addEventListener("mouseover", drawingPlayerShips.drawingSelectedShip)
+                            div.addEventListener("mousedown", function (e) {
+                                dis = this
+                                putShipsOnBoard(e, dis)
+
+                            });
                         }
-                        div.setAttribute("data-x", j);
-                        div.setAttribute("data-y", i);
+                        div.setAttribute("data-x", j)
+                        div.setAttribute("data-y", i)
+                        break;
+                    case 3:
+                        div.classList.add("puttedShip")
                         break;
                 }
-                mainDiv.append(div);
+                if (es) {
+                    playerBoardHTML.append(div)
+                } else {
+                    mainDiv.append(div)
+                }
             }
         }
-        board.append(mainDiv);
+        if (es) {
+            board.append(playerBoardHTML)
+        } else {
+            board.append(mainDiv)
+        }
+    }
+}
+
+function putShipsOnBoard(e, dis) {
+
+    if (e.button == 0) {
+        const x = parseInt(dis.getAttribute("data-x"))
+        const y = parseInt(dis.getAttribute("data-y"))
+        const shipLength = drawingPlayerShips.selectedShipLenght
+        console.log(shipLength);
+        console.log(x, y);
+        // console.log(playerBoard);
+        console.log(directionShip);
+
+        if (directionShip) { //poziom
+            if (x + shipLength < 12) {
+                for (let i = 0; i < shipLength; i++) {
+                    playerBoard[y][x + i] = 3
+                }
+            } else { //wyjezdza poza plansze
+                let diff = 11 - x
+                for (let i = 1; i <= shipLength - diff; i++) {
+                    playerBoard[y][x - i] = 3
+                }
+                for (let i = 0; i < diff; i++) {
+                    playerBoard[y][x + i] = 3
+                }
+            }
+        } else { //pion
+            if (y + shipLength < 12) {
+                for (let i = 0; i < shipLength; i++) {
+                    playerBoard[y + i][x] = 3
+                }
+            } else { //wyjezdza poza plansze
+                let diff = 11 - y
+                for (let i = 1; i <= shipLength - diff; i++) {
+                    playerBoard[y - i][x] = 3
+                }
+                for (let i = 0; i < diff; i++) {
+                    playerBoard[y + i][x] = 3
+                }
+            }
+        }
+        boardProperties.createBattleField(playerBoard, true)
+        drawingPlayerShips.selectedShipLenght = 0
     }
 }
 
@@ -113,7 +172,7 @@ let drawShips = {
                     let y = Math.floor(Math.random() * 10) + 1
                     let xEnd = (x + ships[i].length) - 1
 
-                    if (x + ships[i].length <= 11 && this.checkingAllAroundPoziom(x, y, xEnd, board)) {
+                    if (x + ships[i].length <= 11 && this.checkingAllAroundPoziom(x, y, xEnd, board, 1)) {
                         for (let j = 0; j < ships[i].length; j++) {
                             board[y][x + j] = 1
                             chck = false
@@ -124,7 +183,7 @@ let drawShips = {
                     let y = Math.floor(Math.random() * 10) + 1
                     let yEnd = (y + ships[i].length) - 1
 
-                    if (y + ships[i].length <= 11 && this.checkingAllAroundPion(x, y, yEnd, board)) {
+                    if (y + ships[i].length <= 11 && this.checkingAllAroundPion(x, y, yEnd, board, 1)) {
                         for (let j = 0; j < ships[i].length; j++) {
                             board[y + j][x] = 1
                             chck = false
@@ -135,49 +194,49 @@ let drawShips = {
         }
         return board;
     },
-    checkingAllAroundPoziom(xStart, yStart, xEnd, board) {
-        if (board[yStart][xStart] != 1
-            && board[yStart][xStart - 1] != 1
-            && board[yStart][xStart + 1] != 1
-            && board[yStart + 1][xStart] != 1
-            && board[yStart - 1][xStart] != 1
-            && board[yStart - 1][xStart - 1] != 1
-            && board[yStart + 1][xStart - 1] != 1
-            && board[yStart + 1][xStart + 1] != 1
-            && board[yStart - 1][xStart + 1] != 1
+    checkingAllAroundPoziom(xStart, yStart, xEnd, board, num) {
+        if (board[yStart][xStart] != num
+            && board[yStart][xStart - 1] != num
+            && board[yStart][xStart + 1] != num
+            && board[yStart + 1][xStart] != num
+            && board[yStart - 1][xStart] != num
+            && board[yStart - 1][xStart - 1] != num
+            && board[yStart + 1][xStart - 1] != num
+            && board[yStart + 1][xStart + 1] != num
+            && board[yStart - 1][xStart + 1] != num
 
-            && board[yStart][xEnd] != 1
-            && board[yStart][xEnd - 1] != 1
-            && board[yStart][xEnd + 1] != 1
-            && board[yStart + 1][xEnd] != 1
-            && board[yStart - 1][xEnd] != 1
-            && board[yStart - 1][xEnd - 1] != 1
-            && board[yStart + 1][xEnd - 1] != 1
-            && board[yStart + 1][xEnd + 1] != 1
-            && board[yStart - 1][xEnd + 1] != 1
+            && board[yStart][xEnd] != num
+            && board[yStart][xEnd - 1] != num
+            && board[yStart][xEnd + 1] != num
+            && board[yStart + 1][xEnd] != num
+            && board[yStart - 1][xEnd] != num
+            && board[yStart - 1][xEnd - 1] != num
+            && board[yStart + 1][xEnd - 1] != num
+            && board[yStart + 1][xEnd + 1] != num
+            && board[yStart - 1][xEnd + 1] != num
 
         ) { return true }
     },
-    checkingAllAroundPion(xStart, yStart, yEnd, board) {
-        if (board[yStart][xStart] != 1
-            && board[yStart - 1][xStart] != 1
-            && board[yStart - 1][xStart + 1] != 1
-            && board[yStart - 1][xStart - 1] != 1
-            && board[yStart][xStart + 1] != 1
-            && board[yStart][xStart - 1] != 1
-            && board[yStart + 1][xStart] != 1
-            && board[yStart + 1][xStart + 1] != 1
-            && board[yStart + 1][xStart - 1] != 1
+    checkingAllAroundPion(xStart, yStart, yEnd, board, num) {
+        if (board[yStart][xStart] != num
+            && board[yStart - 1][xStart] != num
+            && board[yStart - 1][xStart + 1] != num
+            && board[yStart - 1][xStart - 1] != num
+            && board[yStart][xStart + 1] != num
+            && board[yStart][xStart - 1] != num
+            && board[yStart + 1][xStart] != num
+            && board[yStart + 1][xStart + 1] != num
+            && board[yStart + 1][xStart - 1] != num
 
-            && board[yEnd][xStart] != 1
-            && board[yEnd - 1][xStart] != 1
-            && board[yEnd - 1][xStart + 1] != 1
-            && board[yEnd - 1][xStart - 1] != 1
-            && board[yEnd][xStart - 1] != 1
-            && board[yEnd][xStart + 1] != 1
-            && board[yEnd + 1][xStart] != 1
-            && board[yEnd + 1][xStart + 1] != 1
-            && board[yEnd + 1][xStart - 1] != 1
+            && board[yEnd][xStart] != num
+            && board[yEnd - 1][xStart] != num
+            && board[yEnd - 1][xStart + 1] != num
+            && board[yEnd - 1][xStart - 1] != num
+            && board[yEnd][xStart - 1] != num
+            && board[yEnd][xStart + 1] != num
+            && board[yEnd + 1][xStart] != num
+            && board[yEnd + 1][xStart + 1] != num
+            && board[yEnd + 1][xStart - 1] != num
 
         ) { return true }
     }
@@ -229,14 +288,16 @@ let drawingPlayerShips = {
     },
     drawingSelectedShip() {
         for (let i = 0; i < 12; i++) {
-            playerBoard[i] = []
             for (let j = 0; j < 12; j++) {
                 if (i == 0 || i == (12 - 1)) {
                     playerBoard[i][j] = -1
                 }
                 else {
                     if (j != 0 && j != (12 - 1)) {
-                        playerBoard[i][j] = 0
+                        if (playerBoard[i][j] != 3) {
+                            playerBoard[i][j] = 0
+                        } else {
+                        }
                     }
                     else {
                         playerBoard[i][j] = -1
@@ -244,16 +305,25 @@ let drawingPlayerShips = {
                 }
             }
         }
+        // console.log(playerBoard);
         // console.log(e.k);
         const x = parseInt(this.getAttribute("data-x"))
         const y = parseInt(this.getAttribute("data-y"))
-        console.log(x, y);
+        // console.log(x, y);
 
         const shipLength = drawingPlayerShips.selectedShipLenght
+        let xEnd = (x + shipLength) - 1
+        let putShip = drawShips.checkingAllAroundPoziom(x, y, xEnd, playerBoard, 3)
+        console.log(putShip);
+        // drawShips.checkingAllAroundPoziom(xStart, yStart, xEnd, board)
         if (directionShip) { //poziom
             if (x + shipLength < 12) {
-                for (let i = 0; i < shipLength; i++) {
-                    playerBoard[y][x + i] = 2
+                if (putShip) {
+                    for (let i = 0; i < shipLength; i++) {
+                        playerBoard[y][x + i] = 2
+                    }
+                } else {
+                    // playerBoard[y][x + i] = 4
                 }
             } else { //wyjezdza poza plansze
                 let diff = 11 - x
@@ -281,15 +351,7 @@ let drawingPlayerShips = {
         }
         boardProperties.createBattleField(playerBoard, true)
     },
-    putShipsOnBoard() {
-        console.log("KLIKNIETYT COKOLWIEK SIE DZIEJE?!?!??!?");
-        // d = this
-        // const x = parseInt(d.getAttribute("data-x"))
-        // const y = parseInt(d.getAttribute("data-y"))
-        // const shipLength = drawingPlayerShips.selectedShipLenght
-        // console.log(shipLength);
-        // console.log(x, y);
-    }
+
 
 }
 
@@ -353,8 +415,8 @@ function init() {
     boardProperties.createBattleField(playerBoard, true)
 
     // botBoard = boardProperties.createBoard()
-    // // console.log(botBoard);
     // drawShips.drawShips(botBoard)
+    // console.log(botBoard);
     // boardProperties.createBattleField(botBoard, false)
 
     addFunctions()
